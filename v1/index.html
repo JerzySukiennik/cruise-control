@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<!-- CRUISE CONTROL - entry page: import map, canvas, all UI overlays -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CRUISE CONTROL</title>
+<link rel="stylesheet" href="./styles.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="flash"></div>
+
+<div id="hud" class="hidden">
+  <div id="hud-top">
+    <div id="score-wrap"><span id="score">0</span><span id="combo" class="hidden">x2</span></div>
+    <div id="timer">0:00,00</div>
+    <div id="fuel">FUEL USED: 0</div>
+  </div>
+  <div id="slowmo-wrap"><div id="slowmo-fill"></div></div>
+  <div id="popups"></div>
+  <div id="hint" class="hidden"></div>
+  <button id="btn-mute-hud" class="mini-btn" type="button">SND</button>
+</div>
+
+<div id="mobile" class="hidden">
+  <div id="joy-zone">
+    <div id="joy-base" class="hidden"><div id="joy-knob"></div></div>
+  </div>
+  <div id="btn-slow" class="mbtn">SLO-MO</div>
+  <div id="btn-thrust" class="mbtn">THRUST</div>
+</div>
+
+<div id="loading" class="overlay">
+  <div class="card">
+    <h1 class="title">CRUISE<br>CONTROL</h1>
+    <div id="load-bar"><div id="load-bar-fill"></div></div>
+    <div id="load-text">LOADING...</div>
+  </div>
+</div>
+
+<div id="menu" class="overlay hidden">
+  <div class="card">
+    <h1 class="title">CRUISE<br>CONTROL</h1>
+    <div class="subtitle">YOU ARE THE MISSILE</div>
+    <button id="btn-play" class="big-btn" type="button">PLAY</button>
+    <div id="level-grid"></div>
+    <div class="menu-foot">
+      <button id="btn-mute-menu" class="mini-btn" type="button">SOUND: ON</button>
+      <div id="controls-help">MOUSE steer &middot; SPACE/LMB thrust &middot; SHIFT slow-mo &middot; R restart</div>
+    </div>
+  </div>
+</div>
+
+<div id="card-death" class="overlay hidden">
+  <div class="card small">
+    <h2 class="bailed">BAILED</h2>
+    <div id="death-tip">press R to retry</div>
+    <div class="btn-row">
+      <button id="btn-death-retry" class="big-btn" type="button">RETRY</button>
+      <button id="btn-death-menu" class="flat-btn" type="button">MENU</button>
+    </div>
+  </div>
+</div>
+
+<div id="card-win" class="overlay hidden">
+  <div class="card small">
+    <h2 id="win-title">TARGET DESTROYED</h2>
+    <div id="stars">&#9733;&#9733;&#9733;</div>
+    <div class="stats">
+      <div class="stat"><span>TIME</span><b id="win-time">0:00,00</b></div>
+      <div class="stat"><span>FUEL USED</span><b id="win-fuel">0</b></div>
+      <div class="stat"><span>SCORE</span><b id="win-score">0</b></div>
+    </div>
+    <div class="btn-row">
+      <button id="btn-win-retry" class="flat-btn" type="button">RETRY</button>
+      <button id="btn-win-next" class="big-btn" type="button">NEXT</button>
+      <button id="btn-win-menu" class="flat-btn" type="button">MENU</button>
+    </div>
+  </div>
+</div>
+
+<div id="card-pause" class="overlay hidden">
+  <div class="card small">
+    <h2>PAUSED</h2>
+    <div class="btn-row col">
+      <button id="btn-resume" class="big-btn" type="button">RESUME</button>
+      <button id="btn-pause-restart" class="flat-btn" type="button">RESTART</button>
+      <button id="btn-pause-menu" class="flat-btn" type="button">MENU</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
