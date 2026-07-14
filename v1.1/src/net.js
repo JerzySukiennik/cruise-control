@@ -117,7 +117,8 @@ export class Net {
     });
     this.joined = true;
     this._hb = setInterval(() => {
-      if (this.joined) f.update(this._meRef, { t: f.serverTimestamp() }).catch(() => {});
+      // include identity so a node resurrected by a partial update self-heals
+      if (this.joined) f.update(this._meRef, { t: f.serverTimestamp(), name, color }).catch(() => {});
     }, HEARTBEAT_MS);
     this._tick = setInterval(() => this._hostTick(), 1000);
     // fresh run if none, stale-complete, or nobody else active
