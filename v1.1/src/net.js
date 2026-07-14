@@ -105,16 +105,23 @@ export class Net {
   // so two tabs of the same browser count as two players.
   async join(pid, name, color) {
     if (!this.online) return false;
-    this.lbKey = pid;
+    this.lbKey = pid;                                 // stable identity (leaderboard)
     if (!this._tabId) this._tabId = Math.random().toString(36).slice(2, 6);
-    this.pid = pid + '-' + this._tabId;
+    // Time-ordered presence id: a later joiner sorts AFTER everyone already in the
+    // room, so existing players keep their spawn-pad index and nobody collides.
+    this.pid = String(this.now()).padStart(14, '0') + '-' + this._tabId;
     const f = this.fb;
     this._meRef = f.ref(f.db, `${ROOM}/players/${this.pid}`);
     f.onDisconnect(this._meRef).remove();
     await f.set(this._meRef, {
-      name, color, level: 0, phase: 'level', lying: 0, dead: 0,
+      name, color, level: 0, phase: 'level', lying: 0, dead: 0, paused: 0,
       p: [0, 0, 0], q: [0, 0, 0, 1], th: 0, t: f.serverTimestamp()
     });
+    // optimistic self-entry so spawn-pad assignment sees us before the listener round-trips
+    this.playersRaw[this.pid] = {
+      name, color, level: 0, phase: 'level', lying: 0, dead: 0, paused: 0,
+      p: [0, 0, 0], q: [0, 0, 0, 1], th: 0, t: this.now()
+    };
     this.joined = true;
     this._hb = setInterval(() => {
       // include identity so a node resurrected by a partial update self-heals

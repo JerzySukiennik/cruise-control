@@ -7,6 +7,7 @@ export class Input {
     this.keyX = 0; this.keyY = 0;
     this.thrust = false;
     this.slowmo = false;
+    this._thrustLatched = false;        // ignore held thrust key until released
     this.active = false;                // gameplay input enabled
     this.locked = false;
     this.wantLock = false;
@@ -28,13 +29,21 @@ export class Input {
 
   _action() { if (this.onAction) this.onAction(); }
 
+  // Thrust with a latch: a press that also triggers a state action (respawn,
+  // relaunch) must not ignite the engine until the key is physically released.
+  _setThrust(v) {
+    if (v) { if (!this._thrustLatched) this.thrust = true; }
+    else { this.thrust = false; this._thrustLatched = false; }
+  }
+  consumeThrust() { this.thrust = false; this._thrustLatched = true; }
+
   _bind() {
     window.addEventListener('keydown', e => {
       if (e.repeat) return;
       this._gesture();
       const k = e.code;
       this._keys.add(k);
-      if (k === 'Space') { this.thrust = true; this._action(); e.preventDefault(); }
+      if (k === 'Space') { this._setThrust(true); this._action(); e.preventDefault(); }
       if (k === 'ShiftLeft' || k === 'ShiftRight') this.slowmo = true;
       if (k === 'KeyR' && this.onRestart) this.onRestart();
       if (k === 'KeyK' && this.onKamikaze) this.onKamikaze();
@@ -44,12 +53,12 @@ export class Input {
     window.addEventListener('keyup', e => {
       const k = e.code;
       this._keys.delete(k);
-      if (k === 'Space') { this.thrust = false; e.preventDefault(); }
+      if (k === 'Space') { this._setThrust(false); e.preventDefault(); }
       if (k === 'ShiftLeft' || k === 'ShiftRight') this.slowmo = false;
     });
     window.addEventListener('blur', () => {
       this._keys.clear();
-      this.thrust = false; this.slowmo = false;
+      this.thrust = false; this.slowmo = false; this._thrustLatched = false;
     });
 
     if (!this.isTouch) {
@@ -77,11 +86,11 @@ export class Input {
         this._gesture();
         if (e.button === 0) this._action();
         if (!this.active) return;
-        if (e.button === 0) this.thrust = true;
+        if (e.button === 0) this._setThrust(true);
         if (!this.locked && this.wantLock) this.requestLock();
       });
       window.addEventListener('mouseup', e => {
-        if (e.button === 0) this.thrust = false;
+        if (e.button === 0) this._setThrust(false);
       });
       this.canvas.addEventListener('contextmenu', e => e.preventDefault());
     } else {
@@ -150,7 +159,7 @@ export class Input {
       el.addEventListener('touchcancel', end);
     };
     hookBtn(document.getElementById('btn-thrust'), this._thrustIds,
-      v => { this.thrust = v; }, () => this._action());
+      v => this._setThrust(v), () => this._action());
     hookBtn(document.getElementById('btn-slow'), this._slowIds, v => { this.slowmo = v; });
     const kbtn = document.getElementById('btn-kami');
     if (kbtn) {
@@ -178,7 +187,7 @@ export class Input {
 
   setActive(v) {
     this.active = v;
-    if (!v) { this.thrust = false; this.slowmo = false; }
+    if (!v) { this.thrust = false; this.slowmo = false; this._thrustLatched = false; }
   }
 
   resetAim() { this.aimX = 0; this.aimY = 0; this.mouseNX = 0; this.mouseNY = 0; }

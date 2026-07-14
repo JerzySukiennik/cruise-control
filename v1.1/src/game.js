@@ -354,6 +354,7 @@ export class Game {
     this.input.setActive(false);
     if (this.audio) this.audio.stopEngine();
     $('card-pause').classList.remove('hidden');
+    this._netSend(true); // tell peers we're paused so our ghost hides, not freezes
   }
 
   resume() {
@@ -362,6 +363,7 @@ export class Game {
     this.state = this._pausedFrom || 'playing';
     this.input.setActive(true);
     this.input.requestLock();
+    this._netSend(true); // clear the paused flag for peers
   }
 
   toMenu() {
@@ -395,9 +397,11 @@ export class Game {
   actionPressed() {
     if (this.state === 'dead' && this.deathTimer > 0.4) {
       this.restart(); // respawn at level start (resets timer/fuel/score)
+      this.input.consumeThrust(); // the respawn press must not also ignite
       this.input.requestLock();
     } else if (this.state === 'lying' && this.lieT > 0.25) {
       this._relaunch();
+      this.input.consumeThrust(); // relaunch off this press; thrust needs a fresh one
     } else if (this.state === 'playing' && this.aiming) {
       this._dash();
     }
@@ -940,6 +944,7 @@ export class Game {
       level: this.levelIndex,
       lying: this.state === 'lying' ? 1 : 0,
       dead: this.state === 'dead' ? 1 : 0,
+      paused: this.state === 'paused' ? 1 : 0,
       th: (this.state === 'playing' && fl.launched && (this.input.thrust || this.dashing)) ? 1 : 0,
       p: [r2(fl.pos.x), r2(fl.pos.y), r2(fl.pos.z)],
       q: [r3(fl.quat.x), r3(fl.quat.y), r3(fl.quat.z), r3(fl.quat.w)]
@@ -1012,7 +1017,7 @@ export class Game {
         g.mesh.visible = false; g.label.visible = false; continue;
       }
       const samePlace = raw.phase === myPhase &&
-        (myPhase === 'playground' || raw.level === this.levelIndex) && !raw.dead;
+        (myPhase === 'playground' || raw.level === this.levelIndex) && !raw.dead && !raw.paused;
       g.mesh.visible = samePlace && this.state !== 'menu';
       g.label.visible = g.mesh.visible;
       if (!g.mesh.visible) { g.snap = true; continue; }
