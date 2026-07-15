@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!-- CRUISE CONTROL v1.1 - entry page: import map, canvas, lobby + run UI overlays -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>CRUISE CONTROL</title>
+<link rel="stylesheet" href="./styles.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="flash"></div>
+<div id="crosshair" class="hidden"></div>
+
+<div id="hud" class="hidden">
+  <div id="hud-top">
+    <div id="score-wrap"><span id="score">0</span><span id="combo" class="hidden">x2</span></div>
+    <div id="timer">0:00,00</div>
+    <div id="fuel">FUEL USED: 0</div>
+  </div>
+  <div id="wallet"><div id="credits">&#9670; 0</div><div id="rank">CADET</div></div>
+  <div id="style-rank" class="hidden"></div>
+  <div id="allin" class="hidden"></div>
+  <div id="level-ind">LVL 1/15</div>
+  <div id="slowmo-wrap"><div id="slowmo-fill"></div></div>
+  <div id="pg-status" class="hidden"></div>
+  <div id="pg-panel" class="hidden">
+    <button id="pg-shop" class="pg-btn" type="button">SHOP</button>
+    <button id="pg-extend" class="pg-btn" type="button">EXTEND &rarr; 2:00</button>
+    <div id="pg-bet">
+      <span class="pg-bet-label">ALL-IN</span>
+      <button class="pg-chip" data-bet="clear" type="button">CLR</button>
+      <button class="pg-chip" data-bet="500" type="button">+500</button>
+      <button class="pg-chip" data-bet="1000" type="button">+1K</button>
+      <button class="pg-chip" data-bet="max" type="button">MAX</button>
+      <span id="pg-bet-val">&#9670; 0</span>
+    </div>
+  </div>
+  <div id="popups"></div>
+  <div id="hint" class="hidden"></div>
+  <div id="kami">K &mdash; KAMIKAZE</div>
+  <button id="btn-mute-hud" class="mini-btn" type="button">SND</button>
+</div>
+
+<div id="mobile" class="hidden">
+  <div id="joy-zone">
+    <div id="joy-base" class="hidden"><div id="joy-knob"></div></div>
+  </div>
+  <div id="btn-kami" class="mbtn">K</div>
+  <div id="btn-slow" class="mbtn">SLO-MO</div>
+  <div id="btn-thrust" class="mbtn">THRUST</div>
+</div>
+
+<div id="loading" class="overlay">
+  <div class="card">
+    <h1 class="title">CRUISE<br>CONTROL</h1>
+    <div id="load-bar"><div id="load-bar-fill"></div></div>
+    <div id="load-text">LOADING...</div>
+  </div>
+</div>
+
+<div id="menu" class="overlay hidden">
+  <div class="card">
+    <h1 class="title">CRUISE<br>CONTROL</h1>
+    <div class="subtitle">YOU ARE THE MISSILE</div>
+    <div id="lobby">
+      <input id="pilot-name" type="text" maxlength="10" spellcheck="false" autocomplete="off" placeholder="PILOT NAME">
+      <div id="lobby-rank"></div>
+      <div id="color-row"></div>
+      <button id="btn-play" class="big-btn" type="button">PLAY</button>
+      <div id="lobby-status">CONNECTING...</div>
+      <div id="lobby-players"></div>
+      <div id="best-run" class="hidden"></div>
+    </div>
+    <div class="menu-foot">
+      <button id="btn-mute-menu" class="mini-btn" type="button">SOUND: ON</button>
+      <div id="controls-help">MOUSE steer &middot; SPACE/LMB thrust &middot; SHIFT slow-mo &middot; K kamikaze &middot; C 2nd-chance &middot; R restart</div>
+    </div>
+  </div>
+</div>
+
+<div id="card-death" class="overlay hidden">
+  <div class="card small">
+    <h2 class="bailed">BAILED</h2>
+    <div id="death-tip">SPACE &mdash; RESPAWN &middot; C &mdash; SECOND CHANCE</div>
+    <button id="btn-second-chance" class="big-btn sc-btn hidden" type="button">SECOND CHANCE</button>
+    <div class="btn-row">
+      <button id="btn-death-retry" class="big-btn" type="button">RESPAWN</button>
+      <button id="btn-death-menu" class="flat-btn" type="button">MENU</button>
+    </div>
+  </div>
+</div>
+
+<div id="card-complete" class="overlay hidden">
+  <div class="card small">
+    <h2 id="complete-title">RUN COMPLETE</h2>
+    <div id="complete-levels">0 LEVELS CLEARED THIS RUN</div>
+    <div class="btn-row">
+      <button id="btn-complete-menu" class="big-btn" type="button">MENU</button>
+    </div>
+  </div>
+</div>
+
+<div id="card-pause" class="overlay hidden">
+  <div class="card small">
+    <h2>PAUSED</h2>
+    <div class="btn-row col">
+      <button id="btn-resume" class="big-btn" type="button">RESUME</button>
+      <button id="btn-pause-restart" class="flat-btn" type="button">RESTART LEVEL</button>
+      <button id="btn-pause-menu" class="flat-btn" type="button">QUIT RUN</button>
+    </div>
+  </div>
+</div>
+
+<!-- v1.2 SHOP: full-screen modal opened from the playground; countdown runs underneath -->
+<div id="shop" class="overlay hidden">
+  <div id="shop-panel">
+    <div id="shop-head">
+      <div id="shop-title">SHOP</div>
+      <div id="shop-bal">
+        <span id="shop-credits">&#9670; 0</span>
+        <span id="shop-rank">CADET</span>
+      </div>
+      <button id="shop-close" class="flat-btn" type="button">CLOSE</button>
+    </div>
+    <div id="shop-tabs"></div>
+    <div id="shop-grid"></div>
+  </div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
