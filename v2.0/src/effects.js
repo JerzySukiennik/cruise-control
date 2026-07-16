@@ -48,13 +48,16 @@ export class FlameTrail {
     this.mode = 'gradient';   // gradient | rainbow | stars (set by shop trail)
     this.hue = 0;             // running phase for the rainbow palette
   }
-  // Apply a shop trail definition: 3-stop gradient + optional special mode + softness.
+  // Apply a shop trail definition: 3-stop gradient + optional special mode + softness
+  // + size/rate multipliers so premium trails read VISIBLY different, not just re-tinted.
   applyPalette(def) {
     const p = def || {};
     this.mode = p.mode || 'gradient';
     this.c0.setHex(p.c0 !== undefined ? p.c0 : 0xfff3a0);
     this.c1.setHex(p.c1 !== undefined ? p.c1 : 0xff8c1a);
     this.c2.setHex(p.c2 !== undefined ? p.c2 : 0x6e2408);
+    this.sizeMul = p.size || 1;                // bigger cubes (smoke billows, ember blaze)
+    this.rateMul = p.rate || 1;                // denser spawn (game divides interval by this)
     const mat = this.pool.mesh.material;
     mat.transparent = !!p.transparent;         // smoke/ghost trails read softer
     mat.opacity = p.opacity !== undefined ? p.opacity : 1;
@@ -64,7 +67,7 @@ export class FlameTrail {
     const life = 0.3 + Math.random() * 0.18;
     // trail thickening (#juice): both spawn size and speed scale with the
     // current speed ratio so the flame visibly fattens as the missile speeds up
-    const sizeMul = 0.85 + Math.min(1, speedRatio) * 0.35;
+    const sizeMul = (0.85 + Math.min(1, speedRatio) * 0.35) * (this.sizeMul || 1);
     this.pool.parts[i] = {
       x: pos.x + (Math.random() - 0.5) * 0.25,
       y: pos.y + (Math.random() - 0.5) * 0.25,

@@ -99,6 +99,7 @@ export class Game {
     // v1.1 state
     this.runActive = false;
     this.levelsCleared = 0;
+    this.scoreBank = 0;             // level points waiting to cash out on target hit
     this.kamikaze = 1;
     this.aiming = false;
     this.dashing = false;
@@ -246,9 +247,16 @@ export class Game {
   _award(pts) {
     if (!(pts > 0)) return;
     this.score += pts;
-    this.save.credits += pts;
-    this.save.lifetime += pts;
-    this._scheduleSave();
+    if (this.mode === 'playground') {
+      // sandbox points cash out instantly (small amounts, no stakes)
+      this.save.credits += pts;
+      this.save.lifetime += pts;
+      this._scheduleSave();
+    } else {
+      // level points are AT RISK: they only bank on a confirmed target hit —
+      // die before the target and the whole attempt's earnings are gone
+      this.scoreBank += pts;
+    }
   }
 
   _scCost() { return SC_COSTS[Math.min(this._scCount, SC_COSTS.length - 1)]; }
@@ -374,7 +382,7 @@ export class Game {
 
     // state reset
     this.time = 0; this.fuel = 0; this.burnAcc = 0; this.flameAcc = 0;
-    this.score = 0; this.combo = 0; this.comboTimer = 0;
+    this.score = 0; this.scoreBank = 0; this.combo = 0; this.comboTimer = 0;
     this.slowMeter = 1; this.timescale = 1;
     this.winTimer = -1; this.deathTimer = -1;
     this.lowTime = 0; this.roofCool = 0; this.throttleSm = 0;
@@ -922,7 +930,7 @@ export class Game {
     this.debris.burst(tpos, count, colors, 1.5 + Math.min(0.6, runScore * 0.0003));
     this.puff.burst(tpos, 20);
     this.shake.add(1.0 + Math.min(0.4, runScore * 0.0002));
-    this.flash.hit(1, isS ? '#ffe14d' : '#ffffff');    // gold flash on an S-rank strike
+    this.flash.hit(1, isS ? '#ffe14d' : (this.fxFlash || '#ffffff')); // S-rank gold beats the FX tint
     this._winSlowDur = 1.3 + Math.min(0.9, runScore * 0.0004);        // longer hold, higher score
     this._camTargetLock = tpos.clone();
 
@@ -934,6 +942,16 @@ export class Game {
       const bonus = Math.round(runScore * 0.5);
       this._award(bonus);
       this._popup('S-RANK STRIKE! +' + bonus, true);
+    }
+
+    // ---- bank the attempt: level points cash out ONLY here (die = lose them) ----
+    if (this.scoreBank > 0) {
+      this.save.credits += this.scoreBank;
+      this.save.lifetime += this.scoreBank;
+      this._popup('BANKED ◆' + this.scoreBank, true);
+      this.scoreBank = 0;
+      this._scheduleSave();
+      this.syncHud();
     }
 
     // ---- all-in payout (#10) ----
@@ -1196,7 +1214,7 @@ export class Game {
         fl.forward(_f);
         _v.copy(fl.pos).addScaledVector(_f, -1.7);
         _v2.copy(_f).negate();
-        const rate = this.dashing ? 0.008 : (0.018 - this._speedRatio * 0.008);
+        const rate = (this.dashing ? 0.008 : (0.018 - this._speedRatio * 0.008)) / (this.flame.rateMul || 1);
         while (this.flameAcc >= rate) {
           this.flameAcc -= rate;
           this.flame.spawn(_v, _v2, fl.speed, this._speedRatio);

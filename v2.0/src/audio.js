@@ -2,12 +2,14 @@
 import * as THREE from 'three';
 
 // Shop sound packs: no new files — reshape the existing OGGs via playbackRate + gain.
+// Values are DELIBERATELY dramatic — a pack the player paid for must be
+// unmistakable on the very first click, not an audiophile subtlety.
 const PACKS = {
   default: { rate: 1.0, gain: 1.0 },
-  retro:   { rate: 1.35, gain: 0.85 },   // higher pitch, snappier
-  bass:    { rate: 0.72, gain: 1.1 },    // lower pitch, boomy
-  scifi:   { rate: 1.15, gain: 1.0 },    // brighter
-  quiet:   { rate: 1.0, gain: 0.5 }      // attenuated for focus
+  retro:   { rate: 1.65, gain: 0.85 },   // chipmunk-arcade: much higher pitch, snappy
+  bass:    { rate: 0.55, gain: 1.3 },    // slowed way down, boomy subwoofer feel
+  scifi:   { rate: 1.25, gain: 1.0, detune: true }, // brighter + wobbly double-tap echo
+  quiet:   { rate: 1.0, gain: 0.3 }      // strongly attenuated for focus
 };
 
 export class AudioManager {
@@ -54,6 +56,17 @@ export class AudioManager {
     a.setVolume(vol * this.pack.gain);
     a.setPlaybackRate(rate * this.pack.rate);
     a.play();
+    // sci-fi pack: quick detuned echo tap so it reads unmistakably "spacey"
+    if (this.pack.detune) {
+      setTimeout(() => {
+        if (this.muted) return;
+        const e = new THREE.Audio(this.listener);
+        e.setBuffer(buf);
+        e.setVolume(vol * this.pack.gain * 0.35);
+        e.setPlaybackRate(rate * this.pack.rate * 1.19);
+        e.play();
+      }, 70);
+    }
     a.onEnded = () => {
       a.isPlaying = false;
       const i = this._live.indexOf(a);

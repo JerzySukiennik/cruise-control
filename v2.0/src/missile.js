@@ -83,7 +83,8 @@ export function applySkin(mesh, skin) {
     if (skin.dot !== undefined) m.dot.color.setHex(skin.dot);
     const emi = skin.emissive !== undefined ? skin.emissive : 0x000000;
     m.body.emissive.setHex(emi);
-    m.nose.emissive.setHex(emi);
+    // two-tone glow skins (neon) can give the nose its own emissive
+    m.nose.emissive.setHex(skin.noseEmissive !== undefined ? skin.noseEmissive : emi);
   }
   const bank = mesh.userData.bank;
   if (bank) {

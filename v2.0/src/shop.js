@@ -52,24 +52,25 @@ export const CATALOG = {
     { id: 'crimson', name: 'CRIMSON', price: 800, body: 0x9b1b1b, dot: 0xffd23f },
     { id: 'aqua', name: 'AQUA', price: 800, body: 0x1fd6ff },
     { id: 'lime', name: 'LIME', price: 800, body: 0x9be021 },
-    { id: 'gold', name: 'GOLD', price: 2500, body: 0xffcf33, dot: 0xffffff, emissive: 0x3a2c00 },
-    { id: 'chrome', name: 'CHROME', price: 3000, body: 0xdfe4ef, nose: 0xeef2fb, emissive: 0x20242e },
+    { id: 'gold', name: 'GOLD', price: 2500, body: 0xffcf33, dot: 0xffffff, emissive: 0x8a6a10 },
+    { id: 'chrome', name: 'CHROME', price: 3000, body: 0xdfe4ef, nose: 0xeef2fb, emissive: 0x5a6474 },
     { id: 'carbon', name: 'CARBON', price: 3500, body: 0x1c1c22, nose: 0x2a2a33, dot: 0xff5a4e },
-    { id: 'neon', name: 'NEON', price: 4000, body: 0xff2fd0, nose: 0x2ffcff, emissive: 0x2a0030 },
+    // NEON actually glows: near-full emissive so the bloom pass lights it up
+    { id: 'neon', name: 'NEON', price: 4000, body: 0xff2fd0, nose: 0x2ffcff, emissive: 0xd400aa, noseEmissive: 0x00c8cc, dot: 0xffffff },
     { id: 'camo', name: 'CAMO', price: 2000, body: 0x5a6b3a, nose: 0x6b5a3a, dot: 0x2f3a20 },
-    { id: 'candy', name: 'CANDY', price: 5000, body: 0xff6fd5, nose: 0x9b5de5 },
+    { id: 'candy', name: 'CANDY', price: 5000, body: 0xff6fd5, nose: 0x9b5de5, emissive: 0x6a1a4a },
     { id: 'retro', name: 'RETRO', price: 6000, body: 0xf0c2a0, nose: 0xa0d0f0, dot: 0xff8c1a, shape: [1.18, 1.18, 1] }
   ],
   // TRAILS — FlameTrail 3-stop palette + optional special mode / softness.
   trail: [
     { id: 'classic', name: 'CLASSIC', price: 0, c0: 0xfff3a0, c1: 0xff8c1a, c2: 0x6e2408 },
-    { id: 'plasma', name: 'PLASMA', price: 1000, c0: 0xd6f4ff, c1: 0x2f9bff, c2: 0x0a2a6e },
-    { id: 'toxic', name: 'TOXIC', price: 1500, c0: 0xe6ff9b, c1: 0x5fdd2f, c2: 0x14501a },
-    { id: 'smoke', name: 'SMOKE', price: 2000, c0: 0xe8e8ee, c1: 0x9a9aa6, c2: 0x3a3a44, transparent: true, opacity: 0.5 },
-    { id: 'ghost', name: 'GHOST', price: 2000, c0: 0xffffff, c1: 0xd6e2ff, c2: 0x8fa0c8, transparent: true, opacity: 0.4 },
-    { id: 'ember', name: 'EMBER', price: 2500, c0: 0xffd0a0, c1: 0xff4a2a, c2: 0x5a0e04 },
-    { id: 'rainbow', name: 'RAINBOW', price: 3500, mode: 'rainbow', c0: 0xff4e4e, c1: 0x37c8c3, c2: 0xb07ce8 },
-    { id: 'stars', name: 'STARS', price: 4000, mode: 'stars', c0: 0xffffff, c1: 0xffe14d, c2: 0x2a2a44 }
+    { id: 'plasma', name: 'PLASMA', price: 1000, c0: 0xd6f4ff, c1: 0x2f9bff, c2: 0x0a2a6e, size: 1.2, rate: 1.4 },
+    { id: 'toxic', name: 'TOXIC', price: 1500, c0: 0xe6ff9b, c1: 0x5fdd2f, c2: 0x14501a, size: 1.2, rate: 1.4 },
+    { id: 'smoke', name: 'SMOKE', price: 2000, c0: 0xe8e8ee, c1: 0x9a9aa6, c2: 0x3a3a44, transparent: true, opacity: 0.55, size: 1.6, rate: 1.5 },
+    { id: 'ghost', name: 'GHOST', price: 2000, c0: 0xffffff, c1: 0xd6e2ff, c2: 0x8fa0c8, transparent: true, opacity: 0.4, size: 1.35 },
+    { id: 'ember', name: 'EMBER', price: 2500, c0: 0xffd9a0, c1: 0xff3a1a, c2: 0x330a04, size: 1.3, rate: 1.7 },
+    { id: 'rainbow', name: 'RAINBOW', price: 3500, mode: 'rainbow', c0: 0xff4e4e, c1: 0x37c8c3, c2: 0xb07ce8, size: 1.2, rate: 1.6 },
+    { id: 'stars', name: 'STARS', price: 4000, mode: 'stars', c0: 0xffffff, c1: 0xffe14d, c2: 0x2a2a44, size: 1.15, rate: 1.9 }
   ],
   // SOUNDS — pack id maps to AudioManager pitch/gain (no new files).
   sound: [
@@ -79,13 +80,13 @@ export const CATALOG = {
     { id: 'bass', name: 'BASS', price: 2000, pack: 'bass' },
     { id: 'scifi', name: 'SCI-FI', price: 2500, pack: 'scifi' }
   ],
-  // FX — target explosion color set (null = use the level's own target colors).
+  // FX — target explosion color set + screen-flash tint (null = level's own colors).
   fx: [
     { id: 'fx_default', name: 'DEFAULT', price: 0, colors: null },
-    { id: 'fx_gold', name: 'GOLD BLAST', price: 1200, colors: [0xffd23f, 0xffcf33, 0xffe98a, 0xfff4c2] },
-    { id: 'fx_white', name: 'FLASHBANG', price: 1500, colors: [0xffffff, 0xe8e8f0, 0xc8d0e0] },
-    { id: 'fx_toxic', name: 'TOXIC', price: 2000, colors: [0x9be021, 0x5fdd2f, 0xd6ff9b, 0x2f8f1a] },
-    { id: 'fx_rainbow', name: 'RAINBOW', price: 3000, colors: [0xff4e4e, 0xff8c1a, 0xffd23f, 0x7dff8a, 0x37c8c3, 0x6fa8ff, 0xb07ce8] }
+    { id: 'fx_gold', name: 'GOLD BLAST', price: 1200, colors: [0xffd23f, 0xffcf33, 0xffe98a, 0xfff4c2], flash: '#ffd23f' },
+    { id: 'fx_white', name: 'FLASHBANG', price: 1500, colors: [0xffffff, 0xe8e8f0, 0xc8d0e0], flash: '#ffffff' },
+    { id: 'fx_toxic', name: 'TOXIC', price: 2000, colors: [0x9be021, 0x5fdd2f, 0xd6ff9b, 0x2f8f1a], flash: '#9be021' },
+    { id: 'fx_rainbow', name: 'RAINBOW', price: 3000, colors: [0xff4e4e, 0xff8c1a, 0xffd23f, 0x7dff8a, 0x37c8c3, 0x6fa8ff, 0xb07ce8], flash: '#ff8cf0' }
   ],
   // CROSSHAIR — CSS class suffix on #crosshair (ch-<cls>).
   crosshair: [
@@ -159,9 +160,10 @@ export function applyLoadout(game, save) {
   const sound = findItem('sound', eq.sound) || findItem('sound', 'default');
   if (game.audio) game.audio.setPack(sound.pack);
 
-  // FX -> win explosion debris colors (null = use the level's target colors)
+  // FX -> win explosion debris colors + screen-flash tint (null = level defaults)
   const fx = findItem('fx', eq.fx) || findItem('fx', 'fx_default');
   game.fxDebris = fx.colors || null;
+  game.fxFlash = fx.flash || null;
 
   // CROSSHAIR -> CSS class on #crosshair (preserve the .hidden toggle used in play)
   const ch = findItem('crosshair', eq.crosshair) || findItem('crosshair', 'ch_red');

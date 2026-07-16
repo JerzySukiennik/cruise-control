@@ -488,12 +488,12 @@ export const LEVELS = [
       bg: 0x0a0a14, fogNear: 50, fogFar: 320, hemiSky: 0xaab4dc, hemiGround: 0x2e2a44, hemiInt: 1.1,
       sun: 0.85, groundTex: 'gridDark2', groundColor: 0xffffff, groundSize: 900, groundRepeat: 220, groundY: 0
     },
-    spawn: { pos: [0, 5, -20], dir: [0, 0, 1] },
+    spawn: { pos: [0, 5, -14], dir: [0, 0, 1] },   // camera must clear the -25 entry cap
     flight: { maxSpeed: 32, turnRate: 1.9 },
     targetColors: [0xffffff, 0xd0d0d6, 0x333340, 0x8899aa],
     build(ctx) {
       const wallMat = gm(ctx, 'gridDark', 0x8f8fa0, 60, 40);
-      launcherStand(ctx, [0, 3.2, -20]);
+      launcherStand(ctx, [0, 3.2, -14]);
       corridor(ctx, { x: 30, y: 40, z0: -26, z1: 216, mat: wallMat });
       box(ctx, [0, 20, -25], [60, 40, 2], wallMat, { noNearMiss: true, breakable: false });
       box(ctx, [0, 20, 215], [60, 40, 2], wallMat, { noNearMiss: true, breakable: false });
@@ -523,13 +523,15 @@ export const LEVELS = [
       bg: 0x0c1a22, fogNear: 50, fogFar: 300, hemiSky: 0xa8d4d8, hemiGround: 0x28444a, hemiInt: 1.2,
       sun: 0.85, groundTex: 'gridDark2', groundColor: 0xffffff, groundSize: 900, groundRepeat: 220, groundY: 0
     },
-    spawn: { pos: [0, 5, -18], dir: [0, 0, 1] },
+    // spawn far enough from the entry cap (-23) that the chase camera (-9 behind)
+    // starts INSIDE the corridor — was showing the wall instead of the missile
+    spawn: { pos: [0, 5, -12], dir: [0, 0, 1] },
     flight: { maxSpeed: 34, turnRate: 1.9 },
     targetColors: [0xffffff, 0xcc7722, 0xd9d9de],
     build(ctx) {
       const wallMat = gm(ctx, 'gridDark2', 0x3a5a5e, 40, 28);
       const pistonMat = gm(ctx, 'gridOrange', 0xcc7722, 40, 8);
-      launcherStand(ctx, [0, 3.2, -18]);
+      launcherStand(ctx, [0, 3.2, -12]);
       corridor(ctx, { x: 20, y: 28, z0: -24, z1: 210, mat: wallMat });
       box(ctx, [0, 14, -23], [42, 28, 2], wallMat, { noNearMiss: true, breakable: false });
       box(ctx, [0, 14, 209], [42, 28, 2], wallMat, { noNearMiss: true, breakable: false });
@@ -688,12 +690,12 @@ export const LEVELS = [
       bg: 0x0b1020, fogNear: 46, fogFar: 300, hemiSky: 0xaab8e0, hemiGround: 0x2a3050, hemiInt: 1.15,
       sun: 0.85, groundTex: 'gridDark', groundColor: 0xffffff, groundSize: 900, groundRepeat: 220, groundY: 0
     },
-    spawn: { pos: [0, 6, -12], dir: [0, 0.3, 1] },
+    spawn: { pos: [0, 6, -6], dir: [0, 0.3, 1] },  // camera must clear the -17 entry cap
     flight: { maxSpeed: 32, turnRate: 1.9 },
     targetColors: [0xffffff, 0x6fd3ff, 0x333340],
     build(ctx) {
       const wallMat = gm(ctx, 'gridDark2', 0x506080, 32, 30);
-      launcherStand(ctx, [0, 3.2, -12]);
+      launcherStand(ctx, [0, 3.2, -6]);
       // entry hall leading into the vertical shaft
       corridor(ctx, { x: 16, y: 22, z0: -18, z1: 22, mat: wallMat });
       box(ctx, [0, 11, -17], [33, 22, 2], wallMat, { noNearMiss: true, breakable: false });
@@ -735,12 +737,12 @@ export const LEVELS = [
       bg: 0x121a2e, fogNear: 60, fogFar: 380, hemiSky: 0xb8c4e8, hemiGround: 0x323a54, hemiInt: 1.25,
       sun: 0.9, groundTex: 'gridDark2', groundColor: 0xffffff, groundSize: 900, groundRepeat: 220, groundY: 0
     },
-    spawn: { pos: [0, 5, -22], dir: [0, 0, 1] },
+    spawn: { pos: [0, 5, -16], dir: [0, 0, 1] },   // camera must clear the -27 entry cap
     flight: { maxSpeed: 33, turnRate: 1.9 },
     targetColors: [0xffd23f, 0xffffff, 0x333340, 0xff8c1a],
     build(ctx) {
       const wallMat = gm(ctx, 'gridDark', 0x707585, 52, 34);
-      launcherStand(ctx, [0, 3.2, -22]);
+      launcherStand(ctx, [0, 3.2, -16]);
       corridor(ctx, { x: 26, y: 34, z0: -28, z1: 220, mat: wallMat });
       box(ctx, [0, 17, -27], [54, 34, 2], wallMat, { noNearMiss: true, breakable: false });
       box(ctx, [0, 17, 219], [54, 34, 2], wallMat, { noNearMiss: true, breakable: false });
